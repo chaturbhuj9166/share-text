@@ -29,11 +29,14 @@ import shareRoutes from "./routes/shareRoutes.js";
 import searchUser from "./routes/searchuser.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 connectToDB();
 
 const app = express();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 app.use(cors({
   origin: process.env.FRONTEND_URL,
@@ -43,11 +46,19 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
 app.use("/api/users", UserRouter);
 app.use("/api/text", shareRoutes);
 app.use("/api/search", searchUser);
 app.use("/api/chat", chatRoutes);
 app.use("/api/messages", messageRoutes);
+
+// Fallback for SPA routing
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+});
 
 app.listen(process.env.PORT, () => {
   console.log(`🚀 Backend running on port ${process.env.PORT}`);
