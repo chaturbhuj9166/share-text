@@ -16,7 +16,7 @@ export default function App() {
 
       {/* ✅ HEADER + FOOTER */}
       <Route element={<Layout />}>
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/" element={<Dashboard />} />
         <Route path="/receive" element={<ReceiveModal />} />
           <Route path="/chat/:chatId" element={<Chat />} />
       </Route>
