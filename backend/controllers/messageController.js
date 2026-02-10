@@ -7,8 +7,19 @@ export const sendMessage = async (req, res) => {
   try {
     const { chatId, text } = req.body;
 
+    // 🔐 AUTH CHECK (IMPORTANT)
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
     if (!chatId || !text) {
       return res.status(400).json({ message: "chatId & text required" });
+    }
+
+    // 🧠 CHAT EXIST CHECK
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      return res.status(404).json({ message: "Chat not found" });
     }
 
     const message = await Message.create({
@@ -17,22 +28,26 @@ export const sendMessage = async (req, res) => {
       text,
     });
 
-    await Chat.findByIdAndUpdate(chatId, {
-      lastMessage: text,
-    });
+    chat.lastMessage = text;
+    await chat.save();
 
-    // 🔥 SOCKET.IO REAL-TIME EMIT
-    const io = getIO();
-    io.to(chatId).emit("receive_message", {
-      _id: message._id,
-      chatId,
-      sender: req.user.id,
-      text,
-      createdAt: message.createdAt,
-    });
+    // 🔥 SOCKET.IO (SAFE EMIT)
+    try {
+      const io = getIO();
+      io.to(chatId).emit("receive_message", {
+        _id: message._id,
+        chatId,
+        sender: req.user.id,
+        text,
+        createdAt: message.createdAt,
+      });
+    } catch (e) {
+      console.log("⚠️ Socket not initialized, emit skipped");
+    }
 
     res.status(201).json(message);
   } catch (error) {
+    console.error("SEND MESSAGE ERROR:", error);
     res.status(500).json({ message: error.message });
   }
 };
