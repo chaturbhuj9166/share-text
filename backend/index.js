@@ -46,8 +46,20 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// Serve frontend static files
-app.use(express.static(path.join(__dirname, "../frontend/dist")));
+// Serve frontend static files with correct MIME types
+app.use(express.static(path.join(__dirname, "../frontend/dist"), {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (path.endsWith('.mjs')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (path.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    } else if (path.endsWith('.svg')) {
+      res.setHeader('Content-Type', 'image/svg+xml');
+    }
+  }
+}));
 
 app.use("/api/users", UserRouter);
 app.use("/api/text", shareRoutes);
@@ -56,7 +68,7 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/messages", messageRoutes);
 
 // Fallback for SPA routing
-app.get("*", (req, res) => {
+app.get(/^(?!\/api\/).*/, (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
 
