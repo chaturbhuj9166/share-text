@@ -14,7 +14,7 @@ export default function Login() {
     try {
     await API.post("/users/login", { email, password });
       toast.success("Login successful"); 
-      navigate("/dashboard");
+      navigate("/");
     } catch {
       toast.error("Invalid email or password");
     }

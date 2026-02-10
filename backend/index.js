@@ -1,78 +1,78 @@
-// import express from "express";
-// import dotenv from "dotenv";
-// import cors from "cors";
-// import cookieParser from "cookie-parser";
-// import { connectToDB } from "./config/db.js";
-// import UserRouter from "./routes/UserRouter.js";
-
-// dotenv.config();
-// connectToDB();
-
-// const app = express();
-// app.use(cors({ origin: "http://localhost:5173", credentials: true }));
-// app.use(express.json());
-// app.use(cookieParser());
-
-// app.use("/api/users", UserRouter);
-
-// app.listen(4000, () => console.log("🚀 Backend running"));
-
-
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { connectToDB } from "./config/db.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
+import { connectToDB } from "./config/db.js";
 import UserRouter from "./routes/UserRouter.js";
 import shareRoutes from "./routes/shareRoutes.js";
 import searchUser from "./routes/searchuser.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
-import path from "path";
-import { fileURLToPath } from "url";
 
 dotenv.config();
 connectToDB();
 
 const app = express();
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+/* =======================
+   ✅ CORS (SAFE & FLEXIBLE)
+======================= */
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://share-text-1.onrender.com",
+  "https://share-text-eabo.onrender.com",
+];
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
-  credentials: true
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS not allowed"));
+    }
+  },
+  credentials: true,
 }));
 
+/* =======================
+   ✅ MIDDLEWARES
+======================= */
 app.use(express.json());
 app.use(cookieParser());
 
-// Serve frontend static files with correct MIME types
-app.use(express.static(path.join(__dirname, "../frontend/dist"), {
-  setHeaders: (res, path) => {
-    if (path.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    } else if (path.endsWith('.mjs')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    } else if (path.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css');
-    } else if (path.endsWith('.svg')) {
-      res.setHeader('Content-Type', 'image/svg+xml');
-    }
-  }
-}));
-
+/* =======================
+   ✅ API ROUTES
+======================= */
 app.use("/api/users", UserRouter);
 app.use("/api/text", shareRoutes);
 app.use("/api/search", searchUser);
 app.use("/api/chat", chatRoutes);
 app.use("/api/messages", messageRoutes);
 
-// Fallback for SPA routing
+/* =======================
+   ✅ FRONTEND (VITE BUILD)
+======================= */
+const frontendPath = path.join(__dirname, "../frontend/dist");
+app.use(express.static(frontendPath));
+
+/* =======================
+   ✅ SPA FALLBACK
+======================= */
 app.get(/^(?!\/api\/).*/, (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+  res.sendFile(path.join(frontendPath, "index.html"));
 });
 
-app.listen(process.env.PORT, () => {
-  console.log(`🚀 Backend running on port ${process.env.PORT}`);
-});
 
+/* =======================
+   ✅ SERVER START
+======================= */
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log(`🚀 Backend running on port ${PORT}`);
+});
