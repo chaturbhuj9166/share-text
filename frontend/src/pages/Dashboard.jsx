@@ -1,30 +1,28 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import API from "../api/axios";
 
+
+
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      toast.error("Please login first");
+      window.location.href = "/login"; 
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default function Dashboard() {
+
   const navigate = useNavigate();
 
   const [text, setText] = useState("");
   const [slug, setSlug] = useState("");
   const [copied, setCopied] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true);
-
-  // useEffect(() => {
-  //   const checkAuth = async () => {
-  //     try {
-  //       await API.get("/users/login"); // cookie auto jayegi
-  //       setCheckingAuth(false);
-  //     } catch {
-  //       toast.error("Please login first");
-  //       navigate("/login");
-  //     }
-  //   };
-  //   checkAuth();
-  // }, []);
-
-  // if (checkingAuth) return null;
 
   const createSlug = async () => {
     if (!text.trim()) {
@@ -37,7 +35,7 @@ export default function Dashboard() {
       setSlug(res.data.slug);
       setCopied(false);
       toast.success("Share created");
-    } catch {
+    } catch (error) {
       toast.error("Something went wrong");
     }
   };

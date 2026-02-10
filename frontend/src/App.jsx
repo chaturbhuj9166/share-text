@@ -1,34 +1,25 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Header from "./components/Header";
+import { Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
+
 import Dashboard from "./pages/Dashboard";
+import ReceiveModal from "./components/ReceiveModal";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import ReceivePage from "./components/ReceiveModal";
-
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import Chat from "./pages/Chat";
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Header />
+    <Routes>
+      {/* ❌ NO HEADER / FOOTER */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
+      {/* ✅ HEADER + FOOTER */}
+      <Route element={<Layout />}>
         <Route path="/dashboard" element={<Dashboard />} />
-
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
-        <Route path="/receive" element={<ReceivePage />} />
-
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-
-   
-
-
-      <ToastContainer position="top-right" autoClose={2000} />
-    </BrowserRouter>
+        <Route path="/receive" element={<ReceiveModal />} />
+          <Route path="/chat/:chatId" element={<Chat />} />
+      </Route>
+    </Routes>
   );
 }

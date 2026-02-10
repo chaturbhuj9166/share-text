@@ -26,6 +26,9 @@ import { connectToDB } from "./config/db.js";
 
 import UserRouter from "./routes/UserRouter.js";
 import shareRoutes from "./routes/shareRoutes.js";
+import searchUser from "./routes/searchuser.js";
+import chatRoutes from "./routes/chatRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
 
 dotenv.config();
 connectToDB();
@@ -42,6 +45,9 @@ app.use(cookieParser());
 
 app.use("/api/users", UserRouter);
 app.use("/api/text", shareRoutes);
+app.use("/api/search", searchUser);
+app.use("/api/chat", chatRoutes);
+app.use("/api/messages", messageRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log(`🚀 Backend running on port ${process.env.PORT}`);
