@@ -1,5 +1,6 @@
 import Message from "../models/Message.js";
 import Chat from "../models/Chat.js";
+import { getIO } from "../config/socket.js";
 
 // send message
 export const sendMessage = async (req, res) => {
@@ -18,6 +19,16 @@ export const sendMessage = async (req, res) => {
 
     await Chat.findByIdAndUpdate(chatId, {
       lastMessage: text,
+    });
+
+    // 🔥 SOCKET.IO REAL-TIME EMIT
+    const io = getIO();
+    io.to(chatId).emit("receive_message", {
+      _id: message._id,
+      chatId,
+      sender: req.user.id,
+      text,
+      createdAt: message.createdAt,
     });
 
     res.status(201).json(message);

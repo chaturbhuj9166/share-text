@@ -15,6 +15,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.30.3",
     "react-toastify": "^11.0.5",
+    "socket.io-client": "^4.8.3",
     "tostify": "^0.0.1"
   },
   "devDependencies": {
