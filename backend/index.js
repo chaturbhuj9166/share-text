@@ -114,7 +114,7 @@ const __dirname = path.dirname(__filename);
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
-  "https://share-text-eabo.onrender.com",
+  "https://share-text-eabo.onrender.com/",
 ];
 
 app.use(
