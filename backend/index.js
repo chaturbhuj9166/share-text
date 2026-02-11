@@ -1,5 +1,3 @@
-
-
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -17,16 +15,15 @@ import chatRoutes from "./routes/chatRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
 
 dotenv.config();
-connectToDB();
 
 const app = express();
-const server = http.createServer(app); // 🔥 HTTP SERVER
+const server = http.createServer(app);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /* =======================
-   ✅ CORS (SAFE & FLEXIBLE)
+   ✅ CORS CONFIGURATION
 ======================= */
 const allowedOrigins = [
   "http://localhost:5173",
@@ -75,23 +72,14 @@ export const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("🟢 Socket connected:", socket.id);
 
-  // join chat room
   socket.on("join_chat", (chatId) => {
     socket.join(chatId);
     console.log(`👥 Joined chat: ${chatId}`);
   });
 
-  // when client SENDS message via socket
   socket.on("send_message", (data) => {
-    console.log("📩 Message received from client:", data);
-
-    // broadcast to everyone in that chat room
+    console.log("📩 Message received:", data);
     io.to(data.chatId).emit("receive_message", data);
-  });
-
-  // OPTIONAL: server-side receive listener (for logs / future features)
-  socket.on("receive_message", (data) => {
-    console.log("📥 Message delivered to client:", data);
   });
 
   socket.on("disconnect", () => {
@@ -100,23 +88,22 @@ io.on("connection", (socket) => {
 });
 
 
-/* =======================
-   ✅ FRONTEND (VITE BUILD)
-======================= */
-const frontendPath = path.join(__dirname, "../frontend/dist");
-app.use(express.static(frontendPath));
-
-/* =======================
-   ✅ SPA FALLBACK
-======================= */
-app.get(/^(?!\/api\/).*/, (req, res) => {
-  res.sendFile(path.join(frontendPath, "index.html"));
-});
 
 /* =======================
    ✅ SERVER START
 ======================= */
 const PORT = process.env.PORT || 4000;
-server.listen(PORT, () => {
-  console.log(`🚀 Backend + Socket.IO running on port ${PORT}`);
-});
+
+const startServer = async () => {
+  try {
+    await connectToDB();
+    server.listen(PORT, () => {
+      console.log(`🚀 Backend + Socket.IO running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("❌ Failed to start server:", error.message);
+    process.exit(1);
+  }
+};
+
+startServer();

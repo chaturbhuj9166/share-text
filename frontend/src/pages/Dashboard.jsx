@@ -3,19 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import API from "../api/axios";
 
-
-
-API.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      toast.error("Please login first");
-      window.location.href = "/login"; 
-    }
-    return Promise.reject(error);
-  }
-);
-
 export default function Dashboard() {
 
   const navigate = useNavigate();
