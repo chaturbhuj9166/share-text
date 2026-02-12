@@ -6,15 +6,15 @@ const API = axios.create({
   withCredentials: true,
 });
 
-API.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      toast.error("Please login first");
-      window.location.href = "/users/login";
-    }
-    return Promise.reject(error);
-  }
-);
+// API.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     if (error.response?.status === 401) {
+//       toast.error("Please login first");
+//       window.location.href = "/users/login";
+//     }
+//     return Promise.reject(error);
+//   }
+// );
 
 export default API;
